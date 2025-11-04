@@ -76,3 +76,69 @@ WHERE
 		department_managers.emp_id = employees.emp_id
 	)
 ;
+
+-- 사원별 역대 전체 급여 평균
+SELECT
+	emp.emp_id
+	,(
+		SELECT AVG(sal.salary)
+		FROM salaries sal
+		WHERE emp.emp_id = sal.emp_id
+	) avg_sal
+FROM employees emp
+;
+
+-- ------------------
+-- FROM절에서 사용
+-- ------------------
+SELECT
+	tmp.*
+FROM (
+	SELECT 
+		emp.emp_id
+		,emp.`name`
+	FROM employees emp
+) tmp
+;
+
+-- ------------------
+-- INSERT문에서 사용
+-- ------------------
+INSERT INTO title_emps(
+	emp_id
+	,title_code
+	,start_at
+)
+VALUES (
+	(SELECT MAX(emp_id) FROM employees)
+	,(SELECT title_code FROM titles WHERE title = '사원')
+	,DATE(NOW())
+);
+
+-- ------------------
+-- UPDATE문에서 사용
+-- ------------------
+-- UPDATE는 서브쿼리로 바꿀 테이블을 다시 사용할 수 없다
+-- 그렇기에 아래 코드는 오류가 발생!
+UPDATE title_emps tite1
+SET 
+	tite1.end_at = (
+		SELECT tite2.start_at
+		FROM title_emps tite2
+		WHERE tite2.title_emp_id = 181447
+	)
+WHERE
+	tite1.title_emp_id = 60614
+;
+
+UPDATE title_emps tite1
+SET 
+	tite1.end_at = (
+		SELECT emp.fire_at
+		FROM employees emp
+		WHERE emp.emp_id = 100000
+	)
+WHERE
+	tite1.emp_id = 100000
+	AND tite1.end_at IS NULL
+;
