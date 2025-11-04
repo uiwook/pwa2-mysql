@@ -82,6 +82,7 @@ FROM employees emp
 		AND tit.title = '부장'
 	JOIN salaries sal
 		ON emp.emp_id = sal.emp_id
+		AND sal.end_at IS NULL
 GROUP BY sal.emp_id
 ;
 
