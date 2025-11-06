@@ -51,6 +51,7 @@ FROM employees emp
 	JOIN salaries sal
 		ON emp.emp_id = sal.emp_id
 		AND sal.end_at IS NULL
+		AND emp.fire_at IS NULL
 ORDER BY salary DESC
 LIMIT 10 OFFSET 0
 ;
@@ -183,3 +184,34 @@ FROM employees emp
 GROUP BY tite.title_code, emp.gender
 ORDER BY tite.title_code ASC, emp.gender ASC
 ;
+
+-- 현재 재직 중인 여 사원들의 직급 별, 평균 연봉
+SELECT
+	emp.gender
+	,tite.title_code
+	,AVG(sal.salary)
+FROM employees emp
+	JOIN salaries sal
+		ON emp.emp_id = sal.emp_id
+		AND emp.gender = 'F'
+		AND emp.fire_at IS NULL
+		AND sal.end_at IS NULL
+	JOIN title_emps tite
+		ON emp.emp_id = tite.emp_id
+GROUP BY
+	tite.title_code
+;
+
+-- 부서 별 가장 낮은 연봉
+SELECT
+	depe.dept_code
+	,MIN(sal.salary)
+FROM department_emps depe
+	JOIN salaries sal
+		ON depe.emp_id = sal.emp_id
+		AND sal.end_at IS NULL
+		AND depe.end_at IS NULL
+GROUP BY dept_code
+;
+-- 슈퍼 바이저로 있는 사람들 중에 연봉 많이 받고 있는 사람의 재직 기간
+-- 우리 회사의 연봉 5천만원 이상 받고 있는 사람의 평균 전속 기간
