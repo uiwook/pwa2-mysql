@@ -55,6 +55,25 @@ ORDER BY salary DESC
 LIMIT 10 OFFSET 0
 ;
 
+SELECT
+	emp.emp_id
+	,emp.`name`
+	,tmp_sal.salary
+FROM employees emp
+	JOIN (
+		SELECT
+			sal.emp_id
+			,sal.salary
+		FROM salaries sal
+		WHERE
+			sal.end_at IS NULL
+		ORDER BY sal.salary DESC
+		LIMIT 10
+	) tmp_sal
+		ON emp.emp_id = tmp_sal.emp_id
+ORDER BY tmp_sal.salary DESC
+;
+
 -- 6. 현재 각 부서의 부서장의 부서명, 이름, 입사일을 출력해 주세요.
 SELECT
 	dep.dept_name
@@ -84,6 +103,27 @@ FROM employees emp
 		ON emp.emp_id = sal.emp_id
 		AND sal.end_at IS NULL
 GROUP BY sal.emp_id
+;
+
+SELECT
+	emp.`name`
+	,sub_salaries.avg_sal
+FROM employees emp
+	JOIN (
+		SELECT
+			sal.emp_id
+			,AVG(sal.salary) avg_sal
+		FROM title_emps tite
+			JOIN titles tit
+				ON tite.title_code = tit.title_code
+				AND tit.title = '부장'
+				AND tite.end_at IS NULL
+			JOIN salaries sal
+				ON sal.emp_id = tite.emp_id
+		GROUP BY sal.emp_id
+	) sub_salaries
+		ON emp.emp_id = sub_salaries.emp_id
+		AND emp.fire_at IS NULL
 ;
 
 -- 8. 부서장직을 역임했던 모든 사원의 이름과 입사일, 사번, 부서번호를 출력해 주세요.
@@ -120,9 +160,26 @@ SELECT
 FROM employees emp
 	JOIN title_emps tite
 		ON emp.emp_id = tite.emp_id
+		AND emp.fire_at IS NULL
+		AND tite.end_at IS NULL
 	JOIN titles tit
 		ON tite.title_code = tit.title_code
 WHERE
 	emp.gender = 'F'
 GROUP BY tite.title_code
+ORDER BY tite.title_code ASC
+;
+
+SELECT
+	tite.title_code
+	,emp.gender
+	,COUNT(*) cnt_emp
+FROM employees emp
+	JOIN title_emps tite
+		ON emp.emp_id = tite.emp_id
+		AND emp.fire_at IS NULL
+		AND tite.end_at IS NULL
+-- 		AND emp.gender = 'F'
+GROUP BY tite.title_code, emp.gender
+ORDER BY tite.title_code ASC, emp.gender ASC
 ;
